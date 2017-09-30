@@ -1,0 +1,394 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>Mat's Stock Portfolio Manager</title> 
+	<style>
+	
+  
+    
+    </style>
+    
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.css" />
+	<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.js"></script>
+	<script>
+	
+			
+		
+		
+		
+		
+		
+		
+		
+		
+			
+		
+			
+			
+			
+			
+	function importXML(xfileS, elementName1) {
+		//alert("h")
+		
+		try{
+			
+	var moz = ( typeof document.implementation != 'undefined' ) &&
+	( typeof document.implementation.createDocument != 'undefined' );
+	
+	var ie = ( typeof window.ActiveXObject != 'undefined' );
+	
+	if ( moz ) {
+	
+		xmlDoc = document.implementation.createDocument( "", "", null );
+		//Compatability error here
+		xmlDoc.onload = init;
+	} else if ( ie ) {
+	
+		xmlDoc = new ActiveXObject( "Microsoft.XMLDOM" ); 
+   		xmlDoc.async = false; 
+   		xmlDoc.onreadystatechange = function(){
+			if( xmlDoc.readyState == 4 ) {
+				init();
+										  };
+					}
+	}
+	
+	
+	
+	xmlDoc.load(xfileS);
+	
+//var Xstr= xmlToString(xmlDoc)
+//alert(Xstr)
+
+
+	var x = xmlDoc.getElementsByTagName(elementName1)[0];
+	//alert(x);
+    var y = x.childNodes[0];
+	return y.nodeValue
+	
+	
+
+
+
+
+
+
+			}
+				catch(err){
+			alert("Please Try A Different Stock")
+			return 0
+		}
+		
+		
+		
+		
+		
+	
+}
+
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+
+/*
+
+function xmlToString(xmlData) { 
+
+    var xmlString="";
+    //IE
+    if (window.ActiveXObject){
+        xmlString = xmlData.xml;
+    }
+    // code for Mozilla, Firefox, Opera, etc.
+    else{
+        xmlString = (new XMLSerializer()).serializeToString(xmlData);
+    }
+    return xmlString;
+	
+	
+}   
+
+*/
+
+
+
+
+var stockList = new Array();
+var stockAmountList = new Array();
+var numberStocks=0
+
+
+function pageLoaded(){
+	
+
+   //alert( "ready!" );
+   
+   
+   
+   numberStocks=parseInt(localStorage.getItem('number'))
+   if (numberStocks == null){
+	    numberStocks=0;
+   } else{
+
+
+for (var i = 1; i < numberStocks; i++) {
+    
+	alert(i)
+	var StockName='stock_'+i
+	var stockAmount='stockAmount_'+i
+	
+	stockList[i]=localStorage.getItem(StockName);
+	stockAmountList[i]=parseInt(localStorage.getItem(stockAmount))
+	
+	initiallyLoadStock(stockList[i],stockAmountList[i])
+	
+}
+
+   }
+
+
+
+//localStorage.setItem('names_length', names.length);
+//localStorage.setItem('names_0', names[0]);
+
+   
+//alert( "ready!" )
+
+}
+
+  var totalInvestment=0 
+
+
+function initiallyLoadStock(stockSymbol,stockNumber){
+	
+var xmlURL2='http://dev.markitondemand.com/MODApis/Api/v2/Quote?symbol='
+xmlURL2 = xmlURL2.concat(stockSymbol);
+//alert(xmlURL2)
+var stockPrice=importXML(xmlURL2, "LastPrice")
+var stockName= importXML(xmlURL2, "Name")
+var stockInvestment= stockPrice*stockNumber
+$('#tableData').append('<tr><td>'+stockPrice+'</td>'+'<td>'+stockName+'</td>'+'<td>'+stockNumber+'</td>'+'<td class="invest">'+stockInvestment+'</td></tr>')	
+  
+  
+totalInvestment+=stockInvestment
+
+
+//$('#tableData').append('<tr><td>'+''+'</td>'+'<td>'+''+'</td>'+'<td>'+''+'</td>'+'<td>'+stockInvestment+'</td></tr>')		
+	
+	
+	
+	
+}
+
+
+function findStock(){
+var searchedStock= document.getElementById("t1").value
+//alert(searchedStock)
+document.getElementById("t1").value=''
+var xmlURL1='http://dev.markitondemand.com/MODApis/Api/v2/Lookup?input="'
+xmlURL1 = xmlURL1.concat(searchedStock);
+xmlURL1 = xmlURL1.concat('"');
+//alert(xmlURL1)
+var stockSymbol=importXML(xmlURL1, "Symbol")
+if(stockSymbol==0){return 0}
+var stockName=importXML(xmlURL1, "Name")
+//importXML(xmlURL1, "Symbol")
+//alert(stockSymbol)
+var xmlURL2='http://dev.markitondemand.com/MODApis/Api/v2/Quote?symbol='
+xmlURL2 = xmlURL2.concat(stockSymbol);
+//alert(xmlURL2)
+var stockPrice=importXML(xmlURL2, "LastPrice")
+stockPrice=CurrencyFormatted(stockPrice)
+//stockPrice=money_multiply (stockPrice, 1)
+//(stockPrice).formatMoney(2, '.', ',');
+
+  //$(stockPrice).val(parseFloat($(stockPrice).val()).toFixed(2));
+
+//alert(stockPrice)
+
+
+
+var stockNumber
+
+
+while(isNaN(stockNumber)==true){
+	stockNumber= prompt("How many of this stock have you purchased?", 0)
+
+}
+
+
+
+if((stockNumber==0)||(stockNumber==null)){
+	
+	return false;
+}
+
+
+
+var stockInvestment
+
+stockInvestment=stockPrice * stockNumber
+stockInvestment=CurrencyFormatted(stockInvestment)
+ // (stockInvestment).formatMoney(2, '.', ',');
+$('#tableData').append('<tr><td>'+stockPrice+'</td>'+'<td>'+stockName+'</td>'+'<td>'+stockNumber+'</td>'+'<td class="invest">'+stockInvestment+'</td></tr>')
+
+
+  
+
+
+  
+  totalInvestment = Number(totalInvestment) + Number(stockInvestment)
+//  alert(stockInvestment)
+  //  alert(totalInvestment)
+//totalInvestment=CurrencyFormatted(totalInvestment)
+
+$('#total').remove();
+$('#tableData').append('<tr id="total"><td>'+''+'</td>'+'<td>'+''+'</td>'+'<td>'+''+'</td>'+'<td>'+totalInvestment+'</td></tr>')
+
+
+//alert(totalInvestment)
+
+
+
+
+
+
+
+numberStocks+=1
+
+var locallyStock='stock_'+numberStocks
+var locallyAmount='stockAmount_'+numberStocks
+
+
+
+localStorage.removeItem(locallyStock);
+localStorage.removeItem(locallyAmount);
+localStorage.removeItem('number');
+
+localStorage.setItem(locallyStock, stockSymbol);
+localStorage.setItem(locallyAmount, stockNumber);
+localStorage.setItem('number', numberStocks);
+
+//alert(localStorage.getItem('number'))
+	
+//('#listPrice').listview('refresh');
+
+
+
+			
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ function CurrencyFormatted(amount)
+{
+	var i = parseFloat(amount);
+	if(isNaN(i)) { i = 0.00; }
+	var minus = '';
+	if(i < 0) { minus = '-'; }
+	i = Math.abs(i);
+	i = parseInt((i + .005) * 100);
+	i = i / 100;
+	s = new String(i);
+	if(s.indexOf('.') < 0) { s += '.00'; }
+	if(s.indexOf('.') == (s.length - 2)) { s += '0'; }
+	s = minus + s;
+	amount=s	
+	/*
+	var delimiter = ","; // replace comma if desired
+	var a = amount.split('.',2)
+	var d = a[1];
+	var i = parseInt(a[0]);
+	if(isNaN(i)) { return ''; }
+	var minus = '';
+	if(i < 0) { minus = '-'; }
+	i = Math.abs(i);
+	var n = new String(i);
+	var a = [];
+	while(n.length > 3)
+	{
+		var nn = n.substr(n.length-3);
+		a.unshift(nn);
+		n = n.substr(0,n.length-3);
+	}
+	if(n.length > 0) { a.unshift(n); }
+	n = a.join(delimiter);
+	if(d.length < 1) { amount = n; }
+	else { amount = n + '.' + d; }
+	amount = minus + amount;
+	*/
+	return amount;
+
+}
+
+
+
+		
+	</script>
+		
+		
+		
+
+</head> 
+
+<body onLoad="pageLoaded()"> 
+	<div data-role="page" id="home"> 
+		<div data-role="header">
+			<h1>Mat's Stock Portfolio Manager</h1>
+		</div> 
+		<div data-role="content">
+
+            
+          <table  data-role="listview" data-theme="c" id="tableData" style="width:100%">
+         <tr><td>Price Of A Single Stock</td>
+         <td>Name Of Stock</td>
+         <td>Number Of Stocks Purchased</td>
+         <td>Total Investment In That Stock</td>
+         </tr>
+          
+          
+          
+          
+          </table>
+            
+		</div>
+        
+        
+        <div style="clear:both;" >
+        <input type="text" id="t1">
+        <button onClick="findStock()">Add Stock</button>
+        
+        </div>
+        
+        
+		<div data-role="footer" >
+			<a href=""  style="text-align:center">&copy;Mat Steininger 2016</a>
+		</div> 
+	</div>
+</body>
+</html>
